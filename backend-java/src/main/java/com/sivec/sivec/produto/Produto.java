@@ -1,45 +1,31 @@
 package com.sivec.sivec.produto;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
 
 @Entity
-public class Produto {
+@Table(name = "produto") //Nome da tabela no banco de dados
+@Data//Gera getters, setters, toString, equals e hasCode do lombok
+@NoArgsConstructor //Construtor de Argumentos , necessario para JPA
+@AllArgsConstructor//Construtor com todos os argumentos
+public class Produto{
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)//Estrategia de geraçãpo de id
     private Long id;
 
+    @Column(nullable = false)//Campo não pode ser nulo
     private String nome;
+
     private String descricao;
-    private Double preco;
-    private Integer quantidade;
 
-    public Produto() {}
+    @Column(nullable = false)
+    private BigDecimal preco;
 
-    public Produto(String nome, String descricao, Double preco, Integer quantidade) {
-        this.nome = nome;
-        this.descricao = descricao;
-        this.preco = preco;
-        this.quantidade = quantidade;
-    }
-
-    public Long getId() {  return id; }
-
-    public void setId(Long id) { this.id = id;}
-
-    public String getNome() { return nome;}
-
-    public void setNome(String nome) {this.nome = nome;}
-
-    public String getDescricao() { return descricao; }
-
-    public void setDescricao(String descricao) { this.descricao = descricao; }
-
-    public Double getPreco() { return preco; }
-
-    public void setPreco(Double preco) { this.preco = preco; }
-
-    public Integer getQuantidade() { return quantidade; }
-
-    public void setQuantidade(Integer quantidade) { this.quantidade = quantidade; }
+    @Column(name ="quantidade_estoque", nullable = false)
+    private Integer quantidadeEstoque;
 }

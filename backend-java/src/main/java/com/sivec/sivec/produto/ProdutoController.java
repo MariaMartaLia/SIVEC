@@ -1,5 +1,6 @@
 package com.sivec.sivec.produto;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,10 +17,11 @@ public class ProdutoController {
 
     // Endpoint para criar um novo produto
     @PostMapping
-    public ResponseEntity<ProdutoResponseDTO> criarProduto(@RequestBody ProdutoRequestDTO produtoDTO) {
+    public ResponseEntity<ProdutoResponseDTO>  criarProduto(@Valid @RequestBody ProdutoRequestDTO produtoDTO) {
         ProdutoResponseDTO novoProduto = produtoService.criarProduto(produtoDTO);
         return ResponseEntity.status(HttpStatus.CREATED).body(novoProduto);
     }
+
 
     // Endpoint para listar todos os produtos
     @GetMapping

@@ -1,48 +1,49 @@
-# SIVEC - Sistema de Inventário e Controle de Estoque 
+# SIVEC - Sistema de Controle de Estoque Profissional
 
-O **SIVEC** é uma API REST de alta performance desenvolvida para o gerenciamento eficiente de estoques. O projeto foi construído seguindo os padrões mais modernos do ecossistema Java, com foco em **Clean Code**, **Imutabilidade** e **Arquitetura de Camadas Desacoplada**.
-
----
-
-## Diferenciais Técnicos (Nível Pleno)
-
-Para elevar a qualidade do projeto e garantir a escalabilidade, foram aplicados os seguintes conceitos:
-
-*   **Java 17 Records:** Implementação de **DTOs (Data Transfer Objects)** utilizando Records para garantir a imutabilidade dos dados e um código mais limpo.
-*   **Domain-Driven Design (DDD):** Organização de pacotes focada no domínio do negócio, facilitando a manutenção e evolução do sistema.
-*   **Separação de Responsabilidades:** Camadas de Controller, Service e Repository rigorosamente isoladas.
-*   **Ambiente de Desenvolvimento Robusto:** Desenvolvimento realizado em ambiente **WSL2 (Ubuntu)** com controle de versões via **Git Flow**.
+O **SIVEC** é uma API REST de alta performance desenvolvida com **Spring Boot 3.4.2** e **Java 17**. O projeto foi refatorado de um sistema monolítico básico para uma arquitetura orientada a domínios (**DDD**), aplicando padrões de projeto modernos e segurança de dados em todas as camadas.
 
 ---
 
-## Tecnologias Utilizadas
+## Tecnologias e Decisões Técnicas
 
-*   **Backend:** Java 17 (LTS), Spring Boot 3.x, Spring Data JPA.
-*   **Banco de Dados:** PostgreSQL (Relacional).
-*   **Infraestrutura:** Docker (Containerização do Banco de Dados).
-*   **Build & Dependências:** Maven.
-*   **Ferramentas:** IntelliJ IDEA, Postman, Git.
+### Java 17 + Records
+Utilizamos **Java 17** para aproveitar as últimas melhorias da linguagem. A implementação de **Records** para os DTOs garante:
+*   **Imutabilidade:** Dados que não mudam durante o transporte, evitando efeitos colaterais.
+*   **Código Conciso:** Redução drástica de *boilerplate* (Getters, Setters, Equals, HashCode).
 
----
+### Spring Boot 3 & Spring Data JPA
+*   **Spring Boot 3:** Versão mais estável e performática, com suporte nativo ao Jakarta EE.
+*   **PostgreSQL:** Banco de dados relacional robusto para garantir a integridade referencial do estoque.
 
-##  Arquitetura do Sistema
-
-A API segue o padrão de arquitetura em camadas:
-1.  **Controller:** Ponto de entrada REST, lidando com requisições e respostas via DTOs.
-2.  **Service:** Camada de lógica de negócio e orquestração de dados.
-3.  **Repository:** Interface de comunicação com o banco de dados via JPA/Hibernate.
-4.  **Model (Entity):** Representação fiel das tabelas do banco de dados PostgreSQL.
+### Blindagem com Bean Validation (JSR 380)
+A API implementa uma camada de "defesa" que valida os dados antes de chegarem à lógica de negócio:
+*   `@NotBlank`: Impede produtos sem nome ou descrição.
+*   `@Positive`: Garante que preços e estoque façam sentido no mundo real (proibindo valores negativos).
 
 ---
 
-## Como Executar o Projeto
+## Arquitetura e Padrões de Projeto
 
-### 1. Subir o Banco de Dados com Docker
-Para garantir a consistência dos dados, utilizamos um container PostgreSQL:
-```bash
-docker run --name postgres-sivec \
-  -e POSTGRES_DB=sivec \
-  -e POSTGRES_USER=admin \
-  -e POSTGRES_PASSWORD=admin \
-  -p 5432:5432 \
-  -d postgres
+### 1. Domain-Driven Design (DDD) Simplificado
+O projeto foi organizado em torno do domínio **Produto** (`com.sivec.sivec.produto`). Esta estrutura agrupa:
+*   **Entity:** Mapeamento objeto-relacional.
+*   **Repository:** Abstração da camada de dados.
+*   **Service:** Onde reside a inteligência e as regras de negócio.
+*   **Controller:** Porta de entrada e saída (API).
+
+### 2. Padrão DTO (Data Transfer Object)
+Separamos a **Entidade do Banco** dos **Dados da API**.
+*   `ProdutoRequestDTO`: O que o usuário envia (entrada).
+*   `ProdutoResponseDTO`: O que o sistema devolve (saída).
+*   **Vantagem:** Segurança. Nunca expomos nossa estrutura de banco de dados diretamente para o mundo externo.
+
+### ⚠️ 3. Tratamento Global de Exceções
+Implementamos um **Global Exception Handler** usando `@RestControllerAdvice`. Isso permite que erros técnicos do Java sejam transformados em mensagens amigáveis:
+```json
+{
+  "mensagem": "Erro de validação nos campos",
+  "detalhes": [
+    "preco: O preço deve ser maior que zero",
+    "nome: O nome do produto é obrigatório"
+  ]
+}
